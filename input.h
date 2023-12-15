@@ -1,60 +1,39 @@
-#include <iostream>
-#include <cmath>
-#include <string>
+void input() {
+    // read grid limits
+    nx = 128;
+    ny = 151;
+    il = nx + 2;
+    jl = ny + 2;
+    ie = nx + 3;
+    ib = nx + 4;
+    je = ny + 3;
+    jb = ny + 4;
 
-// Include necessary headers (DIMS, FLO_VAR, MESH_VAR, FLO_PARAM, TIME_VAR, IODEFS) if defined in separate files
+    // read flow parameters
+    kvis = 1;
+    gam = 1.667;
+    prn = 1.0;
+    rho0 = 1;
+    rmu0 = 2.2360612501607223e-004;
+    p0 = 10.0;
+    c0 = std::sqrt(gam * p0 / rho0);
 
-// Assuming these variables are global or defined in another header file
-extern int NX, NY, IL, JL, IE, IB, JE, JB;
-extern int SELECTED_SCHEME;
-extern int KVIS;
-extern float GAMMA, PRN, RHO0, RMU0, P0, C0, RM, U0, V0, RE, RLEN, VTHICK0, MTHICK0;
-extern int NCYC;
-extern float CFL;
-extern int IREAD;
-extern std::string FNAME0, FNAME1, FNAME2;
+    rm = 0.2;
+    u0 = 2.0 * rm * c0;
+    v0 = 0.0;
 
-void INPUT() {
-    // Include DIMS, FLO_VAR, MESH_VAR, FLO_PARAM, TIME_VAR, IODEFS if not defined globally
-    // Using the provided global variables, adjust as needed
+    // reynolds number
+    re = 200.0;
+    rlen = 1.0 / 14.0;
+    vthick0 = 2.0 * re * rmu0 / (u0 * rho0);
+    mthick0 = 4.0 * vthick0;
 
-    // READ GRID LIMITS
-    NX = 128;
-    NY = 151;
-    IL = NX + 2;
-    JL = NY + 2;
-    IE = NX + 3;
-    IB = NX + 4;
-    JE = NY + 3;
-    JB = NY + 4;
+    // read run parameters
+    ncyc = 1000;
+    cfl = 0.6;
 
-    SELECTED_SCHEME = BGK_SCHEME;
-
-    // READ FLOW PARAMETERS
-    KVIS = 1;    // CHANGE THIS TO READ STATEMENT
-    GAMMA = 1.667;    // CHANGE THIS TO READ STATEMENT
-    PRN = 1.0;    // CHANGE THIS TO READ STATEMENT
-    RHO0 = 1;    // CHANGE THIS TO READ STATEMENT
-    RMU0 = 2.2360612501607223E-004;    // CHANGE THIS TO READ STATEMENT
-    P0 = 10.0;
-    C0 = std::sqrt(GAMMA * P0 / RHO0);
-
-    RM = 0.2;    // CHANGE THIS TO READ STATEMENT
-    U0 = 2.0 * RM * C0;
-    V0 = 0.0;
-
-    // REYNOLDS NUMBER
-    RE = 200.0;
-    RLEN = 1.0 / 14.0;    // CHANGE THIS TO READ STATEMENT
-    VTHICK0 = 2.0 * RE * RMU0 / (U0 * RHO0);
-    MTHICK0 = 4.0 * VTHICK0;
-
-    // READ RUN PARAMETERS
-    NCYC = 1000;
-    CFL = 0.6;    // CHANGE THIS TO READ STATEMENT
-
-    // READ FILE NAMES
-    IREAD = 0;  // IREAD = 1 FOR RESTART
-    FNAME0 = "MLAYER.rst";  // RESTART FILE
+    // read file names
+    iread = 0;  // iread = 1 for restart
+    fname0 = "mlayer.rst";  // restart file
 }
 

@@ -1,50 +1,33 @@
-#include <vector>
+int nx, ny;    // mesh size
+int il, jl;    // lower bounds in x and y directions
+int ie, je;    // upper bounds in x and y directions
+int ib, jb;    // bounds for ghost cells in x and y directions
 
-// Assuming these variables are global or defined in another header file
-extern std::vector<float> XX, YY;
-extern std::vector<std::vector<std::vector<float>>> X;
-extern std::vector<std::vector<float>> VOL;
-extern float RLEN, DX, DY;
+std::vector<float> xx, yy;
+std::vector<std::vector<std::vector<float>>> x;
+std::vector<std::vector<float>> volume;
+float rlen, dx, dy;
 
-// Equivalent structure to encapsulate mesh variables
-struct MeshVariables {
-  std::vector<float> XX, YY;
-  std::vector<std::vector<std::vector<float>>> X;
-  std::vector<std::vector<float>> VOL;
-  float RLEN, DX, DY;
-};
-
-// Function to allocate memory for mesh variables
+// function to allocate memory for mesh variables
 void AllocateMeshVariables(int nx, int ny, int ndim) {
-  XX.resize(nx);
-  YY.resize(ny);
+  xx.resize(nx);
+  yy.resize(ny);
 
-  X.resize(nx);
+  x.resize(nx);
   for (int i = 0; i < nx; ++i) {
-    X[i].resize(ny);
+    x[i].resize(ny);
     for (int j = 0; j < ny; ++j) {
-      X[i][j].resize(ndim, 0.0);
+      x[i][j].resize(ndim, 0.0);
     }
   }
 
-  VOL.resize(nx, std::vector<float>(ny, 0.0));
+  volume.resize(nx, std::vector<float>(ny, 0.0));
 }
 
-// Function to deallocate memory for mesh variables
+// function to deallocate memory for mesh variables
 void DeallocateMeshVariables() {
-  XX.clear();
-  YY.clear();
-  X.clear();
-  VOL.clear();
-}
-
-// Function to initialize mesh variables
-MeshVariables InitializeMeshVariables() {
-  MeshVariables meshVars;
-  meshVars.RLEN = 0.0;
-  meshVars.DX = 0.0;
-  meshVars.DY = 0.0;
-  // ... (initialize other variables similarly)
-
-  return meshVars;
+  xx.clear();
+  yy.clear();
+  x.clear();
+  volume.clear();
 }
