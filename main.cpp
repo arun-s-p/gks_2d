@@ -7,17 +7,23 @@
 #include "mesh_variables.h"
 
 #include "input.h"
+#include "mesh.h"
 
 int main() {
     int nstart;
     double mom, tstop, tscale, viztime, vtime;
-    char FNAME[20];
+    char fname[20];
 
+    std::cout << "Reading inputs...\n";
     input();
-    // MESH();
     // INIT();
+    std::cout << "Reference velocity = " << u0 << 
+              "\nInitial vorticity thickness = " << vthick0 << 
+              "\nReynolds number = " << re << 
+              "\nMach number = " << rm << std::endl;
 
-    std::cout << "u0 = " << u0 << " vt = " << vthick0 << " re = " << re << " m = " << rm << std::endl;
+    std::cout << "Generating mesh...\n";
+    mesh();
 
     // counter = 0;
     // viztime = 0.0;
@@ -66,6 +72,7 @@ int main() {
     // }
 
     // OUTPUT();
+    DeallocateMeshVariables();
 
     return 0;
 }
