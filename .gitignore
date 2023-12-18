@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Output files
+*.vtk
+*.dat
+*.rst
+
+# VScode
+*.json

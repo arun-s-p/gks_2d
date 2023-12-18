@@ -10,6 +10,7 @@
 #include "mesh.h"
 #include "initialize.h"
 #include "time_step.h"
+#include "update.h"
 
 int main() {
     int nstart;
@@ -55,7 +56,7 @@ int main() {
     // Actual time stepping starts here
     for ( cyc = 1; cyc <= ncyc; ++cyc) {
         CalculateDT();
-        // UPDATE();
+        UpdateField();
         simtime += dtmin;
 
         // if (CYC % 50 == 0)

@@ -1,173 +1,154 @@
-#include <cmath>
-#include <iostream>
+void derivs_bgk() {
+    const float eps = 1.0e-7;
+    float dsl, dsr, dx, dy;
+    float fc[4], fcp[4];
+    float wl[4], wr[4], wlp[4], wrp[4], w1p[4], w2p[4];
+    std::vector<float>  dwt0;
+    float mu;
+    int i, j, n, ip1, jp1;
+    float plw[2], prw[2], betal[2], betar[2], alphal[2], alphar[2];
+    float omegal[2], omegar[2];
+    float smv = 1e-6;
 
-// Assuming these variables are global or defined in another header file
-extern int IL, JL;
-extern double **X, **VOL;
-extern double **W, **WX;
-extern double **DW, **FW, **VW;
-extern double **DTMIN;
-extern double GAMMA, PRN, RMU0;
+    ResetVariables(ie, je, 4, 2);
+    dwt0.resize(4, 0.0);
 
-void BGKFLUX(const double *WL, const double *WR, const double *W1P, const double *W2P,
-             double DSL, double DSR, double DTMIN, double RMU0, double *FC, double GAMMA, double PRN);
+    // find flux contributions in i direction
+    for (j = 1; j < jl - 1; ++j) {
+        for (i = 1; i < il - 1; ++i) {
+            dy = coords[i][j + 1][1] - coords[i][j][1];
+            dsl = 0.5 * (coords[i + 1][j][0] - coords[i][j][0]);
+            dsr = 0.5 * (coords[i + 2][j][0] - coords[i + 1][j][0]);
 
-void DERIVS_BGK() {
-    const double EPS = 1.0E-7;
-    double DWL, DWR, DSL, DSR, DX, DY, XY;
-    double FC[4], FD[4], FV[4], FCP[4], FDP[4], FVP[4];
-    double WL[4], WR[4], WLP[4], WRP[4], W1P[4], W2P[4];
-    double DWT0[4];
-    double MU;
-    int I, J, N, IP1, JP1;
-    double PLW[2], PRW[2], betaL[2], betaR[2], alphaL[2], alphaR[2];
-    double omegaL[2], omegaR[2];
-    double SMV = 1E-6;
+            // weno interpolation
+            for (n = 0; n < 4; ++n) {
+                // reconstruct wl and wr for n = 1 to 4 from w - x direction i index
+                plw[0] = 0.5 * (w[i][j][n] + w[i + 1][j][n]);
+                plw[1] = -0.5 * w[i - 1][j][n] + 1.5 * w[i][j][n];
 
-    DW = 0.0;
-    FW = 0.0;
-    VW = 0.0;
-    WX = 0.0;
-    DWT0 = 0.0;
+                prw[0] = 1.5 * w[i + 1][j][n] - 0.5 * w[i + 2][j][n];
+                prw[1] = 0.5 * (w[i][j][n] + w[i + 1][j][n]);
 
-    // Find flux contributions in I direction
-    for (J = 1; J <= JL - 1; ++J) {
-        for (I = 1; I <= IL - 1; ++I) {
-            DY = X[2][I][J + 1] - X[2][I][J];
-            DSL = 0.5 * (X[1][I + 1][J] - X[1][I][J]);
-            DSR = 0.5 * (X[1][I + 2][J] - X[1][I + 1][J]);
+                betal[0] = pow(w[i + 1][j][n] - w[i][j][n], 2);
+                betal[1] = pow(w[i][j][n] - w[i - 1][j][n], 2);
 
-            // WENO interpolation
-            for (N = 0; N < 4; ++N) {
-                // Reconstruct WL and WR for N = 1 to 4 from W - X direction I index
-                PLW[0] = 0.5 * (W[N][I][J] + W[N][I + 1][J]);
-                PLW[1] = -0.5 * W[N][I - 1][J] + 1.5 * W[N][I][J];
+                betar[0] = pow(w[i + 2][j][n] - w[i + 1][j][n], 2);
+                betar[1] = pow(w[i + 1][j][n] - w[i][j][n], 2);
 
-                PRW[0] = 1.5 * W[N][I + 1][J] - 0.5 * W[N][I + 2][J];
-                PRW[1] = 0.5 * (W[N][I][J] + W[N][I + 1][J]);
+                alphal[0] = 2.0 / (3.0 * pow(smv + betal[0], 2));
+                alphal[1] = 1.0 / (3.0 * pow(smv + betal[1], 2));
 
-                betaL[0] = pow(W[N][I + 1][J] - W[N][I][J], 2);
-                betaL[1] = pow(W[N][I][J] - W[N][I - 1][J], 2);
+                alphar[0] = 1.0 / (3.0 * pow(smv + betar[0], 2));
+                alphar[1] = 2.0 / (3.0 * pow(smv + betar[1], 2));
 
-                betaR[0] = pow(W[N][I + 2][J] - W[N][I + 1][J], 2);
-                betaR[1] = pow(W[N][I + 1][J] - W[N][I][J], 2);
+                omegal[0] = alphal[0] / (alphal[0] + alphal[1]);
+                omegal[1] = alphal[1] / (alphal[0] + alphal[1]);
 
-                alphaL[0] = 2.0 / (3.0 * pow(SMV + betaL[0], 2));
-                alphaL[1] = 1.0 / (3.0 * pow(SMV + betaL[1], 2));
+                omegar[0] = alphar[0] / (alphar[0] + alphar[1]);
+                omegar[1] = alphar[1] / (alphar[0] + alphar[1]);
 
-                alphaR[0] = 1.0 / (3.0 * pow(SMV + betaR[0], 2));
-                alphaR[1] = 2.0 / (3.0 * pow(SMV + betaR[1], 2));
-
-                omegaL[0] = alphaL[0] / (alphaL[0] + alphaL[1]);
-                omegaL[1] = alphaL[1] / (alphaL[0] + alphaL[1]);
-
-                omegaR[0] = alphaR[0] / (alphaR[0] + alphaR[1]);
-                omegaR[1] = alphaR[1] / (alphaR[0] + alphaR[1]);
-
-                WL[N] = omegaL[0] * PLW[0] + omegaL[1] * PLW[1];
-                WR[N] = omegaR[0] * PRW[0] + omegaR[1] * PRW[1];
+                wl[n] = omegal[0] * plw[0] + omegal[1] * plw[1];
+                wr[n] = omegar[0] * prw[0] + omegar[1] * prw[1];
             }
 
-            W1P[0] = W[0][I][J];
-            W1P[1] = W[2][I][J];
-            W1P[2] = -W[1][I][J];
-            W1P[3] = W[3][I][J];
+            w1p[0] = w[i][j][0];
+            w1p[1] = w[i][j][1];
+            w1p[2] = w[i][j][2];
+            w1p[3] = w[i][j][3];
 
-            W2P[0] = W[0][I + 1][J];
-            W2P[1] = W[2][I + 1][J];
-            W2P[2] = -W[1][I + 1][J];
-            W2P[3] = W[3][I + 1][J];
+            w2p[0] = w[i + 1][j][0];
+            w2p[1] = w[i + 1][j][1];
+            w2p[2] = w[i + 1][j][2];
+            w2p[3] = w[i + 1][j][3];
 
-            BGKFLUX(WL, WR, W1P, W2P, DSL, DSR, DTMIN, RMU0, FC, GAMMA, PRN);
+            // bgkflux(wl, wr, w1p, w2p, dsl, dsr, dtmin, rmu0, fc, gamma, prn);
 
-            FC[0] *= DY;
+            fc[0] *= dy;
 
-            for (N = 0; N < 4; ++N) {
-                // Accumulate complete convective flux
-                DW[N][I][J] += FC[N];
-                DW[N][I + 1][J] -= FC[N];
+            for (n = 0; n < 4; ++n) {
+                // accumulate complete convective flux
+                dw[i][j][n] += fc[n];
+                dw[i + 1][j][n] -= fc[n];
             }
         }
     }
 
-    // Find flux contributions in J direction
-    for (J = 1; J <= JL - 1; ++J) {
-        for (I = 1; I <= IL - 1; ++I) {
-            DX = X[1][I + 1][J] - X[1][I][J];
-            DSL = 0.5 * (X[2][I][J + 1] - X[2][I][J]);
-            DSR = 0.5 * (X[2][I][J + 2] - X[2][I][J + 1]);
+    // find flux contributions in j direction
+    for (j = 1; j < jl - 1; ++j) {
+        for (i = 1; i < il - 1; ++i) {
+            dx = coords[i + 1][j][0] - coords[i][j][0];
+            dsl = 0.5 * (coords[i][j + 1][1] - coords[i][j][1]);
+            dsr = 0.5 * (coords[i][j + 2][1] - coords[i][j + 1][1]);
 
-            // WENO interpolation
-            for (N = 0; N < 4; ++N) {
-                // Reconstruct WL and WR for N = 1 to 4 from W - Y direction J index
-                PLW[0] = 0.5 * (W[N][I][J] + W[N][I][J + 1]);
-                PLW[1] = -0.5 * W[N][I][J - 1] + 1.5 * W[N][I][J];
+            // weno interpolation
+            for (n = 0; n < 4; ++n) {
+                // reconstruct wl and wr for n = 1 to 4 from w - y direction j index
+                plw[0] = 0.5 * (w[i][j][n] + w[i][j + 1][n]);
+                plw[1] = -0.5 * w[i][j - 1][n] + 1.5 * w[i][j][n];
 
-                PRW[0] = 1.5 * W[N][I][J + 1] - 0.5 * W[N][I][J + 2];
-                PRW[1] = 0.5 * (W[N][I][J] + W[N][I][J + 1]);
+                prw[0] = 1.5 * w[i][j + 1][n] - 0.5 * w[i][j + 2][n];
+                prw[1] = 0.5 * (w[i][j][n] + w[i][j + 1][n]);
 
-                betaL[0] = pow(W[N][I][J + 1] - W[N][I][J], 2);
-                betaL[1] = pow(W[N][I][J] - W[N][I][J - 1], 2);
+                betal[0] = pow(w[i][j + 1][n] - w[i][j][n], 2);
+                betal[1] = pow(w[i][j][n] - w[i][j - 1][n], 2);
 
-                betaR[0] = pow(W[N][I][J + 2] - W[N][I][J + 1], 2);
-                betaR[1] = pow(W[N][I][J + 1] - W[N][I][J], 2);
+                betar[0] = pow(w[i][j + 2][n] - w[i][j + 1][n], 2);
+                betar[1] = pow(w[i][j + 1][n] - w[i][j][n], 2);
 
-                alphaL[0] = 2.0 / (3.0 * pow(SMV + betaL[0], 2));
-                alphaL[1] = 1.0 / (3.0 * pow(SMV + betaL[1], 2));
+                alphal[0] = 2.0 / (3.0 * pow(smv + betal[0], 2));
+                alphal[1] = 1.0 / (3.0 * pow(smv + betal[1], 2));
 
-                alphaR[0] = 1.0 / (3.0 * pow(SMV + betaR[0], 2));
-                alphaR[1] = 2.0 / (3.0 * pow(SMV + betaR[1], 2));
+                alphar[0] = 1.0 / (3.0 * pow(smv + betar[0], 2));
+                alphar[1] = 2.0 / (3.0 * pow(smv + betar[1], 2));
 
-                omegaL[0] = alphaL[0] / (alphaL[0] + alphaL[1]);
-                omegaL[1] = alphaL[1] / (alphaL[0] + alphaL[1]);
+                omegal[0] = alphal[0] / (alphal[0] + alphal[1]);
+                omegal[1] = alphal[1] / (alphal[0] + alphal[1]);
 
-                omegaR[0] = alphaR[0] / (alphaR[0] + alphaR[1]);
-                omegaR[1] = alphaR[1] / (alphaR[0] + alphaR[1]);
+                omegar[0] = alphar[0] / (alphar[0] + alphar[1]);
+                omegar[1] = alphar[1] / (alphar[0] + alphar[1]);
 
-                WL[N] = omegaL[0] * PLW[0] + omegaL[1] * PLW[1];
-                WR[N] = omegaR[0] * PRW[0] + omegaR[1] * PRW[1];
+                wl[n] = omegal[0] * plw[0] + omegal[1] * plw[1];
+                wr[n] = omegar[0] * prw[0] + omegar[1] * prw[1];
             }
 
-            if (J == 1 || J == JL - 1) {
-                for (N = 0; N < 4; ++N)
-                    WL[N] = 0.5 * (W[N][I][J] + W[N][I][J + 1]);
-
-                for (N = 0; N < 4; ++N)
-                    WR[N] = WL[N];
+            if (j == 1 || j == jl - 2) {
+                for (n = 0; n < 4; ++n)
+                    wl[n] = 0.5 * (w[i][j][n] + w[i][j + 1][n]);
+                    wr[n] = wl[n];
             }
 
-            // Rotate the variables
-            WLP[0] = WL[0];
-            WLP[1] = WL[2];
-            WLP[2] = -WL[1];
-            WLP[3] = WL[3];
+            // rotate the variables
+            wlp[0] = wl[0];
+            wlp[1] = wl[2];
+            wlp[2] = -wl[1];
+            wlp[3] = wl[3];
 
-            WRP[0] = WR[0];
-            WRP[1] = WR[2];
-            WRP[2] = -WRP[1];
-            WRP[3] = WR[3];
+            wrp[0] = wr[0];
+            wrp[1] = wr[2];
+            wrp[2] = -wr[1];
+            wrp[3] = wr[3];
 
-            W1P[0] = W[0][I][J];
-            W1P[1] = W[2][I][J];
-            W1P[2] = -W[1][I][J];
-            W1P[3] = W[3][I][J];
+            w1p[0] = w[i][j][0];
+            w1p[1] = w[i][j][2];
+            w1p[2] = -w[i][j][1];
+            w1p[3] = w[i][j][3];
 
-            W2P[0] = WR[0][I][J + 1];
-            W2P[1] = WR[2][I][J + 1];
-            W2P[2] = -WRP[1][I][J + 1];
-            W2P[3] = WR[3][I][J + 1];
+            w2p[0] = w[i][j + 1][0];
+            w2p[1] = w[i][j + 1][2];
+            w2p[2] = -w[i][j + 1][1];
+            w2p[3] = w[i][j + 1][3];
 
-            BGKFLUX(WLP, WRP, W1P, W2P, DSL, DSR, DTMIN, RMU0, FCP, GAMMA, PRN);
+            // bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gamma, prn);
 
-            FC[0] = FCP[0]*DX;
-            FC[1] = -FCP[2]*DX;
-            FC[2] = FCP[1]*DX;
-            FC[3] = FCP[3]*DX;
+            fc[0] = fcp[0]*dx;
+            fc[1] = -fcp[2]*dx;
+            fc[2] = fcp[1]*dx;
+            fc[3] = fcp[3]*dx;
 
-            for (N = 0; N < 4; ++N) {
-                // Accumulate complete convective flux
-                DW[N][I][J] += FC[N];
-                DW[N][I + 1][J] -= FC[N];
+            for (n = 0; n < 4; ++n) {
+                // accumulate complete convective flux
+                dw[i][j][n] += fc[n];
+                dw[i + 1][j][n] -= fc[n];
             }
         }
     }
