@@ -1,4 +1,4 @@
-void input() {
+void InputParameters() {
     // read grid limits
     nx = 128;
     ny = 151;

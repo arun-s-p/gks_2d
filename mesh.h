@@ -2,7 +2,7 @@
 #include <cmath>
 
 
-void mesh() {
+void CartesianMesh2D() {
 
     AllocateMeshVariables(ib,jb,2);
 

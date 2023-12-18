@@ -8,6 +8,7 @@
 
 #include "input.h"
 #include "mesh.h"
+#include "initialize.h"
 
 int main() {
     int nstart;
@@ -15,7 +16,7 @@ int main() {
     char fname[20];
 
     std::cout << "Reading inputs...\n";
-    input();
+    InputParameters();
     // INIT();
     std::cout << "Reference velocity = " << u0 << 
               "\nInitial vorticity thickness = " << vthick0 << 
@@ -23,7 +24,9 @@ int main() {
               "\nMach number = " << rm << std::endl;
 
     std::cout << "Generating mesh...\n";
-    mesh();
+    CartesianMesh2D();
+
+    InitializeField();
 
     // counter = 0;
     // viztime = 0.0;
@@ -72,7 +75,7 @@ int main() {
     // }
 
     // OUTPUT();
-    DeallocateMeshVariables();
+    Finalize();
 
     return 0;
 }

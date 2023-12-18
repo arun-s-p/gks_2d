@@ -1,73 +1,92 @@
-#include <iostream>
-#include <fstream>
 #include <iomanip>
 
-// Include necessary headers (DIMS, FLO_VAR, MESH_VAR, FLO_PARAM, IODEFS, TIME_VAR) if defined in separate files
+void WriteVTK(int counter) {
 
-// Assuming these variables are global or defined in another header file
-extern float W[4][IL][JL];
-extern float X[3][IL][JL];
-extern float XX[IL], YY[JL];
-extern float VTHICK0, TIME;
-extern int NX, NY, JL, IL, IE, JE;
-extern int IOUT, IFLO;
-extern std::string FNAME0, FNAME1, FNAME2;
-
-void OUTPUT() {
-    // Include DIMS, FLO_VAR, MESH_VAR, FLO_PARAM, IODEFS, TIME_VAR if not defined globally
-    // Using the provided global variables, adjust as needed
-
-    // LOCAL VARIABLES
-    float XC, YC, DU, DV, OMEGA, EDDY_T, UTHICK, MT_T;
-    float URA, RRA, UFAVRE, MTHICK, VTHICK, DUDY;
-    float UAVG[JL];
-    int I, J, N, IR;
+    // local variables
+    float xc, yc, du, dv, omega;
+    int i, j, np;
 
     std::string jobname = "kh";
-    EDDY_T = TIME / (1.0 / 14.0);
 
-    IFLO = 18;
-    ISIM = 28;
+    // write solution in tecplot format
+    std::ostringstream fname1_stream;
+    fname1_stream << jobname << std::setfill('0') << std::setw(4) << counter << ".vtk";
+    fname1 = fname1_stream.str();
+    std::ofstream vtkFile(fname1.c_str());
 
-    std::ofstream outfile(FNAME1.c_str());
+    vtkFile << "# vtk DataFile Version 3.0\n";
+    vtkFile << "VTK from C++\n";
+    vtkFile << "ASCII\n";
+    vtkFile << "DATASET STRUCTURED_GRID\n";
+    vtkFile << "DIMENSIONS " << nx-1 << " " << ny-1 << " 1\n";
+    np = (nx-1)*(ny-1);
+    vtkFile << "POINTS " << np << " float\n";
 
-    // DUMP SOLUTION FOR RESTARTING
-    for (J = 0; J < JE; ++J) {
-        for (I = 0; I < IE; ++I) {
-            N = static_cast<int>(EDDY_T) + RE;
-            outfile << std::scientific << std::setw(18) << W[0][I][J]
-                    << std::scientific << std::setw(18) << W[1][I][J]
-                    << std::scientific << std::setw(18) << W[2][I][J]
-                    << std::scientific << std::setw(18) << W[3][I][J] << "\n";
+    // Write coordinates
+    for (int j = 2; j < jl-1; ++j) {
+        for (int i = 2; i < il-1; ++i) {
+            xc = 0.5 * (x[i] + x[i + 1]);
+            yc = 0.5 * (y[j] + y[j + 1]);
+            vtkFile << xc << " " << yc << " " << 0.0 << "\n";
         }
     }
-    outfile << TIME << "\n";
+
+    vtkFile << "POINT_DATA " << np << "\n";
+    vtkFile << "SCALARS RHO float\n";
+    vtkFile << "LOOKUP_TABLE default\n";
+
+    for (int j = 2; j < jl - 1; ++j) {
+        for (int i = 2; i < il - 1; ++i) {
+            vtkFile << w[i][j][0] << "\n";
+        }
+    }
+
+    // vtkFile << "POINT_DATA " << np << "\n";
+    vtkFile << "SCALARS U float\n";
+    vtkFile << "LOOKUP_TABLE default\n";
+
+    for (int j = 2; j < jl - 1; ++j) {
+        for (int i = 2; i < il - 1; ++i) {
+            vtkFile << w[i][j][1] << "\n";
+        }
+    }
+
+    // vtkFile << "POINT_DATA " << np << "\n";
+    vtkFile << "SCALARS V float\n";
+    vtkFile << "LOOKUP_TABLE default\n";
+
+    for (int j = 2; j < jl - 1; ++j) {
+        for (int i = 2; i < il - 1; ++i) {
+            vtkFile << w[i][j][2] << "\n";
+        }
+    }
+
+    // vtkFile << "POINT_DATA " << np << "\n";
+    vtkFile << "SCALARS Pressure float\n";
+    vtkFile << "LOOKUP_TABLE default\n";
+
+    for (int j = 2; j < jl - 1; ++j) {
+        for (int i = 2; i < il - 1; ++i) {
+            vtkFile << w[i][j][3] << "\n";
+        }
+    }
+
+    vtkFile.close();
+}
+
+void RestartDump(){
+    
+    int i, j;
+    std::ofstream outfile(fname0.c_str());
+
+    // dump solution for restarting
+    for (j = 0; j < je; ++j) {
+        for (i = 0; i < ie; ++i) {
+            outfile << std::scientific << std::setw(18) 
+                    << w[i][j][0] << ' ' << w[i][j][1] << ' ' 
+                    << w[i][j][2] << ' ' << w[i][j][3] << '\n';
+        }
+    }
+    outfile << time << "\n";
     outfile.close();
-
-    // WRITE SOLUTION IN TECPLOT FORMAT
-    std::ofstream tecplotFile(FNAME1.c_str());
-    tecplotFile << "TITLE = BLAYER NEW SCHEME\n";
-    tecplotFile << "VARIABLES = \"X\" \"Y\" \"RHO\" \"U\" \"V\" \"PRESSURE\" \"VORTICITY\"\n";
-    tecplotFile << "Zone I=" << NX - 1 << ", J=" << NY - 1 << ", F=POINT\n";
-
-    for (J = 2; J <= JL - 1; ++J) {
-        for (I = 2; I <= IL - 1; ++I) {
-            XC = 0.5 * (XX[I] + XX[I + 1]);
-            YC = 0.5 * (YY[J] + YY[J + 1]);
-
-            // COMPUTE VORTICITY
-            float DX = X[0][I + 1][J] - X[0][I - 1][J];
-            float DY = X[1][I][J + 1] - X[1][I][J - 1];
-
-            DU = W[1][I][J + 1] - W[1][I][J - 1];
-            DV = W[2][I + 1][J] - W[2][I - 1][J];
-            OMEGA = DV / DX - DU / DY;
-
-            tecplotFile << std::scientific << std::setw(18) << XC << std::scientific << std::setw(18) << YC
-                        << std::scientific << std::setw(18) << W[0][I][J] << std::scientific << std::setw(18) << W[1][I][J]
-                        << std::scientific << std::setw(18) << W[2][I][J] << std::scientific << std::setw(18) << W[3][I][J]
-                        << std::scientific << std::setw(18) << OMEGA << "\n";
-        }
-    }
-    tecplotFile.close();
 }
