@@ -1,108 +1,81 @@
-#include <cmath>
+void CalculateDT() {
+    // local variables
+    float dx, dy, ds;
+    float a, prg, pa, ra, cs, qs;
+    int i, j;
 
-// Assuming these variables are global or defined in another header file
-extern float W[4][IL][JL];
-extern float XX[IL], YY[JL];
-extern float VOL[IL][JL];
-extern float RLV[IL][JL];
-extern float DTL[IL][JL];
-extern float DTMIN, CFL, GAMMA, PRN;
-extern int IL, JL, IE, JE, KVIS;
+    // spectral radius in i direction
+    for (j = 2; j < jl - 1; ++j) {
+        for (i = 2; i < il; ++i) {
+            pa = w[i - 1][j][3] + w[i][j][3];
+            ra = w[i - 1][j][0] + w[i][j][0];
+            ds = y[j + 1] - y[j];
 
-void TSTEP() {
-    // LOCAL VARIABLES
-    float DX, DY, DS;
-    float A, PRG, PA, RA, CS, QS;
-    int I, J, ramp, order;
+            cs = std::sqrt(gam * pa / ra) * ds;
+            qs = 0.5 * (w[i - 1][j][1] + w[i][j][1]) * ds;
+            a = std::abs(qs) + cs;
 
-    for (J = 2; J <= JL - 1; ++J) {
-        for (I = 2; I <= IL; ++I) {
-            PA = W[3][I - 1][J] + W[3][I][J];
-            RA = W[0][I - 1][J] + W[0][I][J];
-            DS = YY[J + 1] - YY[J];
-
-            CS = std::sqrt(GAMMA * PA / RA) * DS;
-            QS = 0.5 * (W[1][I - 1][J] + W[1][I][J]) * DS;
-            A = std::abs(QS) + CS;
-
-            DTL[I - 1][J] += A;
-            DTL[I][J] += A;
+            dtl[i - 1][j] += a;
+            dtl[i][j] += a;
         }
     }
 
-    // SPECTRAL RADIUS IN J DIRECTION
-    for (J = 2; J <= JL; ++J) {
-        for (I = 2; I <= IL - 1; ++I) {
-            PA = W[3][I][J - 1] + W[3][I][J];
-            RA = W[0][I][J - 1] + W[0][I][J];
-            DS = XX[I + 1] - XX[I];
+    // spectral radius in j direction
+    for (j = 2; j < jl; ++j) {
+        for (i = 2; i < il - 1; ++i) {
+            pa = w[i][j - 1][3] + w[i][j][3];
+            ra = w[i][j - 1][0] + w[i][j][0];
+            ds = x[i + 1] - x[i];
 
-            CS = std::sqrt(GAMMA * PA / RA) * DS;
-            QS = 0.5 * (W[2][I][J - 1] + W[2][I][J]) * DS;
-            A = std::abs(QS) + CS;
+            cs = std::sqrt(gam * pa / ra) * ds;
+            qs = 0.5 * (w[2][i][j - 1] + w[2][i][j]) * ds;
+            a = std::abs(qs) + cs;
 
-            DTL[I][J - 1] += A;
-            DTL[I][J] += A;
+            dtl[i][j - 1] += a;
+            dtl[i][j] += a;
         }
     }
 
-    // IN CASE OF VISCOUS FLOW TAKE INTO ACCOUNT VISCOSITY
-    if (KVIS > 0) {
-        PRG = GAMMA / PRN;
+    // in case of viscous flow take into account viscosity
+    if (kvis > 0) {
+        prg = gam / prandtl;
 
-        // SPECTRAL RADIUS IN I DIRECTION
-        for (J = 2; J <= JL - 1; ++J) {
-            for (I = 2; I <= IL; ++I) {
-                DTL[I - 1][J] += 2.0 * PRG * RLV[I - 1][J] / (W[0][I - 1][J] * (XX[I] - XX[I - 1]));
-                DTL[I][J] += 2.0 * PRG * RLV[I][J] / (W[0][I][J] * (XX[I + 1] - XX[I]));
+        // spectral radius in i direction
+        for (j = 2; j < jl - 1; ++j) {
+            for (i = 2; i < il; ++i) {
+                dtl[i - 1][j] += 2.0 * prg * rlv[i - 1][j] / (w[i - 1][j][0] * (x[i] - x[i - 1]));
+                dtl[i][j] += 2.0 * prg * rlv[i][j] / (w[i][j][0] * (x[i + 1] - x[i]));
             }
         }
 
-        // SPECTRAL RADIUS IN J DIRECTION
-        for (J = 2; J <= JL; ++J) {
-            for (I = 2; I <= IL - 1; ++I) {
-                DTL[I][J - 1] += 2.0 * PRG * RLV[I][J - 1] / (W[0][I][J - 1] * (YY[J] - YY[J - 1]));
-                DTL[I][J] += 2.0 * PRG * RLV[I][J] / (W[0][I][J] * (YY[J + 1] - YY[J]));
+        // spectral radius in j direction
+        for (j = 2; j < jl; ++j) {
+            for (i = 2; i < il - 1; ++i) {
+                dtl[i][j - 1] += 2.0 * prg * rlv[i][j - 1] / (w[i][j - 1][0] * (y[j] - y[j - 1]));
+                dtl[i][j] += 2.0 * prg * rlv[i][j] / (w[i][j][0] * (y[j + 1] - y[j]));
             }
         }
     }
 
-    // DIVIDE BY RESPECTIVE VOLUMES
-    for (J = 2; J <= JL - 1; ++J) {
-        for (I = 2; I <= IL - 1; ++I) {
-            DTL[I][J] = 4.0 * VOL[I][J] / DTL[I][J];
+    // divide by respective volumes
+    for (j = 2; j < jl - 1; ++j) {
+        for (i = 2; i < il - 1; ++i) {
+            dtl[i][j] = 4.0 * volume[i][j] / dtl[i][j];
         }
     }
 
-    // SET TIME STEP IN HALO CELLS
-    for (J = 2; J <= JL; ++J) {
-        DTL[1][J] = DTL[4][J];
-        DTL[2][J] = DTL[3][J];
-        DTL[IL][J] = DTL[IL - 1][J];
-        DTL[IE][J] = DTL[IL - 2][J];
-    }
-
-    for (I = 2; I <= IL; ++I) {
-        DTL[I][1] = DTL[I][4];
-        DTL[I][2] = DTL[I][3];
-        DTL[I][JL] = DTL[I][JL - 1];
-        DTL[I][JE] = DTL[I][JL - 2];
-    }
-
-    DTL = CFL * DTL;
-
-    // FIND MINIMUM TIME STEP
-    DTMIN = DTL[2][2];
-    for (J = 2; J <= JL - 1; ++J) {
-        for (I = 2; I <= IL - 1; ++I) {
-            if (DTL[I][J] < DTMIN) DTMIN = DTL[I][J];
+    // find minimum time step
+    dtmin = dtl[2][2];
+    for (j = 2; j < jl - 1; ++j) {
+        for (i = 2; i < il - 1; ++i) {
+            if (dtl[i][j] < dtmin) dtmin = dtl[i][j];
         }
     }
 
-    // CONSTANT TIME STEP
-    for (J = 0; J <= JE; ++J) {
-        for (I = 0; I <= IE; ++I) {
-            DTL[I][J] = DTMIN;
+    // constant time step
+    for (j = 0; j < je; ++j) {
+        for (i = 0; i < ie; ++i) {
+            dtl[i][j] = dtmin*cfl;
         }
     }
 }

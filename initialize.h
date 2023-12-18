@@ -51,6 +51,7 @@ void InitializeField() {
     ApplyBoundaryConditions();
     WriteVTK(0);
     std::cout << "Mixing layer initialised and inital field written to VTK \n";
+    AllocateTimeVariables(ie, je);
 }
 
 void Finalize() {
@@ -60,5 +61,6 @@ void Finalize() {
     DeallocateFlowVariables(ie, je, 4);
     std::cout << ", flow variables ";
     DeallocateSolutionVariables();
-    std::cout << "& solution variables";
+    std::cout << ", solution variables";
+    DeallocateTimeVariables();
 }

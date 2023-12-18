@@ -12,7 +12,7 @@ void InputParameters() {
     // read flow parameters
     kvis = 1;
     gam = 1.667;
-    prn = 1.0;
+    prandtl = 1.0;
     rho0 = 1;
     rmu0 = 2.2360612501607223e-004;
     p0 = 10.0;
@@ -30,7 +30,7 @@ void InputParameters() {
 
     // read run parameters
     ncyc = 1000;
-    cfl = 0.6;
+    cfl = 0.8;
 
     // read file names
     iread = 0;  // iread = 1 for restart

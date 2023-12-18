@@ -9,6 +9,7 @@
 #include "input.h"
 #include "mesh.h"
 #include "initialize.h"
+#include "time_step.h"
 
 int main() {
     int nstart;
@@ -28,11 +29,10 @@ int main() {
 
     InitializeField();
 
-    // counter = 0;
-    // viztime = 0.0;
-    // vtime = 1.0;
-    // tstop = 20.0;
-    // counter++;
+    counter = 1;
+    viztime = 0.0;
+    vtime = 1.0;
+    tstop = 20.0;
 
     // if (IREAD == 0) {
     //     TIME = 0.0;
@@ -50,29 +50,29 @@ int main() {
     //     }
     // }
 
-    // viztime = viztime + vtime;
+    viztime += vtime;
 
-    // // Actual time stepping starts here
-    // for (int CYC = 1; CYC <= NCYC; ++CYC) {
-    //     TSTEP();
-    //     UPDATE();
-    //     TIME += DTMIN;
+    // Actual time stepping starts here
+    for ( cyc = 1; cyc <= ncyc; ++cyc) {
+        CalculateDT();
+        // UPDATE();
+        simtime += dtmin;
 
-    //     if (CYC % 50 == 0)
-    //         std::cout << CYC << " " << DTMIN << " " << TIME << std::endl;
+        // if (CYC % 50 == 0)
+            // std::cout << CYC << " " << DTMIN << " " << TIME << std::endl;
 
-    //     tscale = TIME * 0.5 * U0 / VTHICK0;
+        tscale = simtime * 0.5 * u0 / vthick0;
 
-    //     if (tscale > viztime) {
-    //         OUTPUT();
-    //         std::cout << "----------writing---------- t = " << TIME << std::endl;
-    //         counter++;
-    //         viztime = viztime + vtime;
-    //     }
+        if (tscale > viztime) {
+            WriteVTK(counter);
+            std::cout << "----------writing---------- t = " << simtime << std::endl;
+            counter++;
+            viztime += vtime;
+        }
 
-    //     if (tscale > tstop)
-    //         break;
-    // }
+        // if (tscale > tstop)
+            // break;
+    }
 
     // OUTPUT();
     Finalize();
