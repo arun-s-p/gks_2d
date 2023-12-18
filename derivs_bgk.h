@@ -1,9 +1,11 @@
+#include "bgkflux.h"
+
 void derivs_bgk() {
     const float eps = 1.0e-7;
     float dsl, dsr, dx, dy;
-    float fc[4], fcp[4];
+    std::vector<float> fc(4), fcp(4);
     float wl[4], wr[4], wlp[4], wrp[4], w1p[4], w2p[4];
-    std::vector<float>  dwt0;
+    // std::vector<float>  dwt0;
     float mu;
     int i, j, n, ip1, jp1;
     float plw[2], prw[2], betal[2], betar[2], alphal[2], alphar[2];
@@ -11,7 +13,7 @@ void derivs_bgk() {
     float smv = 1e-6;
 
     ResetVariables(ie, je, 4, 2);
-    dwt0.resize(4, 0.0);
+    // dwt0.resize(4, 0.0);
 
     // find flux contributions in i direction
     for (j = 1; j < jl - 1; ++j) {
@@ -61,7 +63,7 @@ void derivs_bgk() {
             w2p[2] = w[i + 1][j][2];
             w2p[3] = w[i + 1][j][3];
 
-            // bgkflux(wl, wr, w1p, w2p, dsl, dsr, dtmin, rmu0, fc, gamma, prn);
+            bgkflux(wl, wr, w1p, w2p, dsl, dsr, dtmin, rmu0, fc, gam, prandtl);
 
             fc[0] *= dy;
 
@@ -138,7 +140,7 @@ void derivs_bgk() {
             w2p[2] = -w[i][j + 1][1];
             w2p[3] = w[i][j + 1][3];
 
-            // bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gamma, prn);
+            // bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gam, prandtl);
 
             fc[0] = fcp[0]*dx;
             fc[1] = -fcp[2]*dx;
