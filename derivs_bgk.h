@@ -76,7 +76,7 @@ void derivs_bgk() {
     }
 
     // find flux contributions in j direction
-    for (j = 1; j < jl - 1; ++j) {
+    /*for (j = 1; j < jl - 1; ++j) {
         for (i = 1; i < il - 1; ++i) {
             dx = coords[i + 1][j][0] - coords[i][j][0];
             dsl = 0.5 * (coords[i][j + 1][1] - coords[i][j][1]);
@@ -153,6 +153,6 @@ void derivs_bgk() {
                 dw[i + 1][j][n] -= fc[n];
             }
         }
-    }
+    }*/
 
 }

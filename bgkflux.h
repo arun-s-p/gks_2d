@@ -1,5 +1,7 @@
-void dxe3(float u, float v, float w, float lambda, float dw[5], std::vector<float> &a,
-          float gam) {
+#include <math.h>
+
+void dxe3(float u, float v, float w, float lambda, float dw[5],
+          std::vector<float> &a, float gam) {
   float dd, cc, bb, aa;
 
   dd = 2.0 * dw[4] -
@@ -19,7 +21,8 @@ void dxe3(float u, float v, float w, float lambda, float dw[5], std::vector<floa
 
 void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
              const float w2p[4], const float dsl, const float dsr,
-             const float dt, const float mu, std::vector<float> &fs, const float gam, const float prn) {
+             const float dt, const float mu, std::vector<float> &fs,
+             const float gam, const float prn) {
   // local variables
   float wl[6], wr[6], w1[6], w2[6];
   float rhol, rhor, uxl, uxr, vxl, vxr, wxl, wxr, el, er, pl, pr;
@@ -81,12 +84,12 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   // ----------------------------------------------------------------
   float upl[7], umr[7], ufl[7], ufr[7], vfl[7], vfr[7], wfl[7], wfr[7];
 
-  upl[0] = 0.5 * erfc(-uxl * sqrt(lambdal));
+  upl[0] = 0.5 * erfc(-uxl * std::sqrt(lambdal));
   upl[1] =
-      uxl * upl[0] + 0.50 * exp(-lambdal * uxl * uxl) / sqrt(lambdal * flo_pi);
-  umr[0] = 0.5 * erfc(uxr * sqrt(lambdar));
+      uxl * upl[0] + 0.50 * exp(-lambdal * uxl * uxl) / std::sqrt(lambdal * flo_pi);
+  umr[0] = 0.5 * erfc(uxr * std::sqrt(lambdar));
   umr[1] =
-      uxr * umr[0] - 0.50 * exp(-lambdar * uxr * uxr) / sqrt(lambdar * flo_pi);
+      uxr * umr[0] - 0.50 * exp(-lambdar * uxr * uxr) / std::sqrt(lambdar * flo_pi);
 
   ufl[0] = 1.0;
   ufl[1] = uxl * ufl[0];
@@ -138,14 +141,14 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   float vx0 = ww0[2] / ww0[0];
   float wx0 = ww0[3] / ww0[0];
 
-  float pp0 = (gam - 1.0) * 
-            (ww0[4] - 0.5 * ww0[1] * (ux0 * ux0 + vx0 * vx0 + wx0 * wx0));
-  float lambda0 = 0.5 * ww0[1] / pp0;
+  float pp0 = (gam - 1.0) *
+              (ww0[4] - 0.5 * ww0[1] * (ux0 * ux0 + vx0 * vx0 + wx0 * wx0));
+  float lambda0 = 0.5 * std::abs(ww0[1] / pp0);
 
   // viscous
   float vis = mu / pp0;
   float eps = 2.0;
-  float tau = vis + dt * fabs(pl - pr) / (pl + pr);
+  float tau = vis + dt * std::abs(pl - pr) / (pl + pr);
 
   // uncomment these for inviscid
   // double taui = 5.0 * (fabs((rhol / lambdal) - (rhor / lambdar))) /
@@ -163,7 +166,6 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   dxe3(uxl, vxl, wxl, lambdal, dwl, acl, gam);
   dxe3(uxr, vxr, wxr, lambdar, dwr, acr, gam);
 
-
 #include "flux_term1.h"
 
 #include "flux_term2.h"
@@ -177,18 +179,36 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
 #include "flux_term6.h"
 
   // Perform the calculations
-  alpha3 = 0.5 * dt * dt - tau * dt + tau * tau * (1.0 - extau);
-  alpha2 = tau * (-dt + alpha4) - alpha5;
+  float alpha3 = 0.5 * dt * dt - tau * dt + tau * tau * (1.0 - extau);
+  float alpha2 = tau * (-dt + alpha4) - alpha5;
 
-  fs[0] = alpha1 * ww0[0] * uf0[0] + alpha2 * term5[0] + alpha3 * term4[0] +
-          term2[0] - alpha7 * term6[0];
-  fs[1] = alpha1 * ww0[0] * uf0[1] + alpha2 * term5[1] + alpha3 * term4[1] +
-          term2[1] - alpha7 * term6[1];
-  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0] + alpha2 * term5[2] +
-          alpha3 * term4[2] + term2[2] - alpha7 * term6[2];
-  fs[3] = 0.5 * alpha1 * ww0[0] * (uf0[2] + uf0[0] * xvw02) +
-          alpha2 * term5[4] + alpha3 * term4[4] + term2[4] - alpha7 * term6[4];
+  /*fs[0] = alpha1 * ww0[0] * uf0[0] + alpha2 * term5[0] ;//+ alpha3 * term4[0] +
+          //term2[0] - alpha7 * term6[0];
+  fs[1] = alpha1 * ww0[0] * uf0[1] + alpha2 * term5[1] ;//+ alpha3 * term4[1] +
+          //term2[1] - alpha7 * term6[1];
+  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0] + alpha2 * term5[2] ;//+
+          //alpha3 * term4[2] + term2[2] - alpha7 * term6[2];
+  fs[3] = 0.5 * alpha1 * ww0[0] * (uf0[2] + uf0[1] * xvw02) +
+          alpha2 * term5[4] ;//+ alpha3 * term4[4] + term2[4] - alpha7 * term6[4];*/
+  fs[0] = alpha1 * ww0[0] * uf0[0] 
+          // + alpha3 * term4[0] 
+          + term2[0] 
+          - alpha7 * term6[0];
+  fs[1] = alpha1 * ww0[0] * uf0[1] 
+          // + alpha3 * term4[1]
+          + term2[1] 
+          - alpha7 * term6[1];
+  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0] 
+          // + alpha3 * term4[2] 
+          + term2[2] 
+          - alpha7 * term6[2];
+  fs[3] = 0.5 * alpha1 * ww0[0] * (uf0[2] + uf0[1] * xvw02)
+         // + alpha3 * term4[4] 
+         + term2[4] 
+         - alpha7 * term6[4];
 
-  fs[0] /= dt fs[1] /= dt fs[2] /= dt fs[3] /= dt
-
+  fs[0] /= dt;
+  fs[1] /= dt;
+  fs[2] /= dt;
+  fs[3] /= dt;
 }

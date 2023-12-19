@@ -67,6 +67,7 @@ int main() {
         if (tscale > viztime) {
             WriteVTK(counter);
             std::cout << "----------writing---------- t = " << simtime << std::endl;
+            std::cout << dtmin << std::endl;
             counter++;
             viztime += vtime;
         }
