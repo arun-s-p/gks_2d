@@ -1,5 +1,3 @@
-#include <vector>
-
 float ***w;
 float ****wx;
 float **rlv;

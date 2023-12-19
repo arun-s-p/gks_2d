@@ -1,12 +1,10 @@
-#include <vector>
-
-std::vector<std::vector<std::vector<float>>> dw; 
-std::vector<std::vector<std::vector<float>>> w0;
+std::vector< std::vector< std::vector< float > > > dw; 
+std::vector< std::vector< std::vector< float > > > w0;
 
 // Function to allocate memory for solution variables
 void AllocateSolutionVariables(int nx, int ny, int nvar) {
-    dw.resize(nx, std::vector<std::vector<float>>(ny, std::vector<float>(nvar, 0.0)));
-    w0.resize(nx, std::vector<std::vector<float>>(ny, std::vector<float>(nvar, 0.0)));
+    dw.resize(nx, std::vector< std::vector< float > >(ny, std::vector< float >(nvar, 0.0)));
+    w0.resize(nx, std::vector< std::vector< float > >(ny, std::vector< float >(nvar, 0.0)));
     std::cout <<" solution variables\n";
 }
 

@@ -1,5 +1,11 @@
 #include <iostream>
 #include <cmath>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <iomanip>
 
 #include "io_variables.h"
 #include "flow_parameters.h"

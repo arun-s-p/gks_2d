@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include "flow_variables.h"
 #include "solution_variables.h"
 
@@ -61,6 +59,6 @@ void Finalize() {
     DeallocateFlowVariables(ie, je, 4);
     std::cout << ", flow variables ";
     DeallocateSolutionVariables();
-    std::cout << ", solution variables";
+    std::cout << ", solution variables \n";
     DeallocateTimeVariables();
 }

@@ -1,5 +1,3 @@
-#include <iomanip>
-
 void WriteVTK(int counter) {
 
     // local variables

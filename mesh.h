@@ -1,7 +1,3 @@
-#include <iostream>
-#include <cmath>
-
-
 void CartesianMesh2D() {
 
     AllocateMeshVariables(ib,jb,2);

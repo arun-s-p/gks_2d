@@ -3,9 +3,9 @@ int il, jl;    // lower bounds in x and y directions
 int ie, je;    // upper bounds in x and y directions
 int ib, jb;    // bounds for ghost cells in x and y directions
 
-std::vector<float> x, y;
-std::vector<std::vector<std::vector<float>>> coords;
-std::vector<std::vector<float>> volume;
+std::vector< float > x, y;
+std::vector< std::vector< std::vector< float > > > coords;
+std::vector< std::vector< float > > volume;
 float rlen, dx, dy;
 
 // function to allocate memory for mesh variables

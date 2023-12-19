@@ -1,7 +1,5 @@
-#include <vector>
-
 float simtime, dtmin, viztime, vtime;
-std::vector<std::vector<float>> dtl;
+std::vector< std::vector< float > > dtl;
 int cyc, ncyc, counter;
 
 // function to allocate memory for time variables
