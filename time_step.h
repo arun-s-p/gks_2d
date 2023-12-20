@@ -4,6 +4,9 @@ void CalculateDT() {
     float a, prg, pa, ra, cs, qs;
     int i, j;
 
+    time_t tstart, tend;
+    time(&tstart);
+
     // spectral radius in i direction
     for (j = 2; j < jl - 1; ++j) {
         for (i = 2; i < il; ++i) {
@@ -78,5 +81,8 @@ void CalculateDT() {
             dtl[i][j] = dtmin*cfl;
         }
     }
+
+    time(&tend);
+    t_tstep += (tend - tstart);
 }
 

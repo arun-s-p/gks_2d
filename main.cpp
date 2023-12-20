@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <time.h>
 
 #include "io_variables.h"
 #include "flow_parameters.h"
@@ -69,11 +70,11 @@ int main() {
             // std::cout << CYC << " " << DTMIN << " " << TIME << std::endl;
 
         tscale = simtime * 0.5 * u0 / vthick0;
+            // std::cout << dtmin << std::endl;
 
         if (tscale > viztime) {
             WriteVTK(counter);
-            std::cout << "----------writing---------- t = " << simtime << std::endl;
-            std::cout << dtmin << std::endl;
+            std::cout << "----------writing---------- t = " << simtime <<" dt = "<<dtmin<< std::endl;
             counter++;
             viztime += vtime;
         }

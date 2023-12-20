@@ -28,6 +28,14 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   float rhol, rhor, uxl, uxr, vxl, vxr, wxl, wxr, el, er, pl, pr;
   float flo_pi = 4.0 * atan(1.0);
 
+  float upl[7], umr[7], ufl[7], ufr[7], vfl[7], vfr[7], wfl[7], wfr[7];
+  float ww0[5];
+
+  std::vector<float> acl(5), acr(5);
+  float dwl[5], dwr[5];
+
+  time_t tstart, tend;
+  time(&tstart);
   // extract variables from input arrays
   wl[0] = wlp[0];
   wr[0] = wrp[0];
@@ -82,7 +90,6 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   // moments
   // f- (-inf->inf) m- (-inf->0) p- (0->inf)
   // ----------------------------------------------------------------
-  float upl[7], umr[7], ufl[7], ufr[7], vfl[7], vfr[7], wfl[7], wfr[7];
 
   upl[0] = 0.5 * erfc(-uxl * std::sqrt(lambdal));
   upl[1] =
@@ -128,7 +135,6 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   float xvwr2 = xfr2 + vfr[2] + wfr[2];
 
   // --- eqn 4.18, collapsing left and right at the cell interface
-  float ww0[5];
   ww0[0] = rhol * upl[0] + rhor * umr[0];
   ww0[1] = rhol * upl[1] + rhor * umr[1];
   ww0[2] = rhol * upl[0] * vfl[1] + rhor * umr[0] * vfr[1];
@@ -142,8 +148,8 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   float wx0 = ww0[3] / ww0[0];
 
   float pp0 = (gam - 1.0) *
-              (ww0[4] - 0.5 * ww0[1] * (ux0 * ux0 + vx0 * vx0 + wx0 * wx0));
-  float lambda0 = 0.5 * std::abs(ww0[1] / pp0);
+              (ww0[4] - 0.5 * ww0[0] * (ux0 * ux0 + vx0 * vx0 + wx0 * wx0));
+  float lambda0 = 0.5 * std::abs(ww0[0] / pp0);
 
   // viscous
   float vis = mu / pp0;
@@ -154,9 +160,6 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   // double taui = 5.0 * (fabs((rhol / lambdal) - (rhor / lambdar))) /
   // (fabs((rhol / lambdal) + (rhor / lambdar))); tau = 0.05 * dt + dt *
   // fmin(1.0, taui);
-
-  std::vector<float> acl(5), acr(5);
-  float dwl[5], dwr[5];
 
   for (int i = 0; i < 5; ++i) {
     dwl[i] = (wl[i] - w1[i]) / dsl;
@@ -182,33 +185,32 @@ void bgkflux(const float wlp[4], const float wrp[4], const float w1p[4],
   float alpha3 = 0.5 * dt * dt - tau * dt + tau * tau * (1.0 - extau);
   float alpha2 = tau * (-dt + alpha4) - alpha5;
 
-  /*fs[0] = alpha1 * ww0[0] * uf0[0] + alpha2 * term5[0] ;//+ alpha3 * term4[0] +
-          //term2[0] - alpha7 * term6[0];
-  fs[1] = alpha1 * ww0[0] * uf0[1] + alpha2 * term5[1] ;//+ alpha3 * term4[1] +
-          //term2[1] - alpha7 * term6[1];
-  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0] + alpha2 * term5[2] ;//+
-          //alpha3 * term4[2] + term2[2] - alpha7 * term6[2];
-  fs[3] = 0.5 * alpha1 * ww0[0] * (uf0[2] + uf0[1] * xvw02) +
-          alpha2 * term5[4] ;//+ alpha3 * term4[4] + term2[4] - alpha7 * term6[4];*/
   fs[0] = alpha1 * ww0[0] * uf0[0] 
-          // + alpha3 * term4[0] 
+          + alpha2 * term5[0] 
+          + alpha3 * term4[0] 
           + term2[0] 
           - alpha7 * term6[0];
-  fs[1] = alpha1 * ww0[0] * uf0[1] 
-          // + alpha3 * term4[1]
+  fs[1] = alpha1 * ww0[0] * uf0[1]
+          + alpha2 * term5[1] 
+          + alpha3 * term4[1] 
           + term2[1] 
           - alpha7 * term6[1];
-  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0] 
-          // + alpha3 * term4[2] 
+  fs[2] = alpha1 * ww0[0] * uf0[0] * vf0[0]
+          + alpha2 * term5[2] 
+          + alpha3 * term4[2] 
           + term2[2] 
           - alpha7 * term6[2];
   fs[3] = 0.5 * alpha1 * ww0[0] * (uf0[2] + uf0[1] * xvw02)
-         // + alpha3 * term4[4] 
-         + term2[4] 
-         - alpha7 * term6[4];
+          + alpha2 * term5[4] 
+          + alpha3 * term4[4] 
+          + term2[4] 
+          - alpha7 * term6[4];
 
   fs[0] /= dt;
   fs[1] /= dt;
   fs[2] /= dt;
   fs[3] /= dt;
+
+  time(&tend);
+  t_flux += (tend - tstart);
 }

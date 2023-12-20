@@ -30,7 +30,7 @@ void InputParameters() {
 
     // read run parameters
     ncyc = 1000;
-    cfl = 0.8;
+    cfl = 0.6;
 
     // read file names
     iread = 0;  // iread = 1 for restart

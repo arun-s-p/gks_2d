@@ -9,6 +9,8 @@ void UpdateField() {
     int i, j, n;
     int imax, jmax;
 
+    time_t tstart, tend;
+    time(&tstart);
     gm1 = gam - 1.0;
 
     // save the current solution
@@ -47,6 +49,8 @@ void UpdateField() {
         }
     }
 
+    time(&tend);
+    t_update += (tend - tstart);
     // call the bconds function
     ApplyBoundaryConditions();
 }

@@ -14,6 +14,8 @@ void derivs_bgk() {
 
     ResetVariables(ie, je, 4, 2);
     // dwt0.resize(4, 0.0);
+    time_t tstart, tend;
+    time(&tstart);
 
     // find flux contributions in i direction
     for (j = 1; j < jl - 1; ++j) {
@@ -51,6 +53,8 @@ void derivs_bgk() {
 
                 wl[n] = omegal[0] * plw[0] + omegal[1] * plw[1];
                 wr[n] = omegar[0] * prw[0] + omegar[1] * prw[1];
+                // wl[n] = 0.5*(w[i][j][n] + w[i+1][j][n]);
+                // wr[n] = wl[n];
             }
 
             w1p[0] = w[i][j][0];
@@ -65,18 +69,16 @@ void derivs_bgk() {
 
             bgkflux(wl, wr, w1p, w2p, dsl, dsr, dtmin, rmu0, fc, gam, prandtl);
 
-            fc[0] *= dy;
-
             for (n = 0; n < 4; ++n) {
                 // accumulate complete convective flux
-                dw[i][j][n] += fc[n];
-                dw[i + 1][j][n] -= fc[n];
+                dw[i][j][n] += fc[n]*dy;
+                dw[i + 1][j][n] -= fc[n]*dy;
             }
         }
     }
 
     // find flux contributions in j direction
-    /*for (j = 1; j < jl - 1; ++j) {
+    for (j = 1; j < jl - 1; ++j) {
         for (i = 1; i < il - 1; ++i) {
             dx = coords[i + 1][j][0] - coords[i][j][0];
             dsl = 0.5 * (coords[i][j + 1][1] - coords[i][j][1]);
@@ -114,9 +116,10 @@ void derivs_bgk() {
             }
 
             if (j == 1 || j == jl - 2) {
-                for (n = 0; n < 4; ++n)
+                for (n = 0; n < 4; ++n){
                     wl[n] = 0.5 * (w[i][j][n] + w[i][j + 1][n]);
                     wr[n] = wl[n];
+                }
             }
 
             // rotate the variables
@@ -140,7 +143,7 @@ void derivs_bgk() {
             w2p[2] = -w[i][j + 1][1];
             w2p[3] = w[i][j + 1][3];
 
-            // bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gam, prandtl);
+            bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gam, prandtl);
 
             fc[0] = fcp[0]*dx;
             fc[1] = -fcp[2]*dx;
@@ -153,6 +156,7 @@ void derivs_bgk() {
                 dw[i + 1][j][n] -= fc[n];
             }
         }
-    }*/
-
+    }
+  time(&tend);
+  t_derivs += (tend - tstart);
 }
