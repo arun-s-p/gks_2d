@@ -81,6 +81,7 @@ void CalculateDT() {
             dtl[i][j] = dtmin*cfl;
         }
     }
+    dtmin *= cfl;
 
     time(&tend);
     t_tstep += (tend - tstart);
