@@ -21,13 +21,14 @@ void UpdateField() {
             }
         }
     }
+   
 
     // call the derivs_bgk function
     derivs_bgk();
 
     for (j = 2; j < jl - 1; ++j) {
         for (i = 2; i < il - 1; ++i) {
-            dt = dtl[i][j] / volume[i][j];
+            dt = dtmin / volume[i][j];
 
             // compute conservative variables from primitive variables
             wc[0] = w0[i][j][0];

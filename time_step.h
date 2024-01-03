@@ -1,6 +1,6 @@
 void CalculateDT() {
     // local variables
-    float dx, dy, ds;
+    float ds;
     float a, prg, pa, ra, cs, qs;
     int i, j;
 
@@ -12,7 +12,7 @@ void CalculateDT() {
         for (i = 2; i < il; ++i) {
             pa = w[i - 1][j][3] + w[i][j][3];
             ra = w[i - 1][j][0] + w[i][j][0];
-            ds = y[j + 1] - y[j];
+            ds = dy; //y[j + 1] - y[j];
 
             cs = std::sqrt(gam * pa / ra) * ds;
             qs = 0.5 * (w[i - 1][j][1] + w[i][j][1]) * ds;
@@ -23,12 +23,12 @@ void CalculateDT() {
         }
     }
 
-    // spectral radius in j direction
+/*    // spectral radius in j direction
     for (j = 2; j < jl; ++j) {
         for (i = 2; i < il - 1; ++i) {
             pa = w[i][j - 1][3] + w[i][j][3];
             ra = w[i][j - 1][0] + w[i][j][0];
-            ds = x[i + 1] - x[i];
+            ds = dx; //x[i + 1] - x[i];
 
             cs = std::sqrt(gam * pa / ra) * ds;
             qs = 0.5 * (w[2][i][j - 1] + w[2][i][j]) * ds;
@@ -38,8 +38,8 @@ void CalculateDT() {
             dtl[i][j] += a;
         }
     }
-
-    // in case of viscous flow take into account viscosity
+*/
+/*    // in case of viscous flow take into account viscosity
     if (kvis > 0) {
         prg = gam / prandtl;
 
@@ -59,8 +59,8 @@ void CalculateDT() {
             }
         }
     }
-
-    // divide by respective volumes
+*/
+/*    // divide by respective volumes
     for (j = 2; j < jl - 1; ++j) {
         for (i = 2; i < il - 1; ++i) {
             dtl[i][j] = 4.0 * volume[i][j] / dtl[i][j];
@@ -82,7 +82,7 @@ void CalculateDT() {
         }
     }
     dtmin *= cfl;
-
+*/
     time(&tend);
     t_tstep += (tend - tstart);
 }

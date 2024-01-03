@@ -8,6 +8,9 @@
 #include <iomanip>
 #include <time.h>
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 #include "io_variables.h"
 #include "flow_parameters.h"
 #include "time_variables.h"
@@ -26,7 +29,6 @@ int main() {
 
     std::cout << "Reading inputs...\n";
     InputParameters();
-    // INIT();
     std::cout << "Reference velocity = " << u0 << 
               "\nInitial vorticity thickness = " << vthick0 << 
               "\nReynolds number = " << re << 
@@ -59,7 +61,6 @@ int main() {
     // }
 
     viztime += vtime;
-
     // Actual time stepping starts here
     for ( cyc = 1; cyc <= ncyc; ++cyc) {
         CalculateDT();

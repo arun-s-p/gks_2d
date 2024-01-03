@@ -13,9 +13,9 @@ void ResetVariables(int nx, int ny, int nvar, int ndim) {
         for (int j = 0; j < ny; ++j) {
             for (int k = 0; k < nvar; ++k) {
                 dw[i][j][k] = 0.0;
-                for (int l = 0; l < ndim; l++) {
-                    wx[i][j][k][l] = 0.0;
-                }
+                // for (int l = 0; l < ndim; l++) {
+                //     wx[i][j][k][l] = 0.0;
+                // }
             }
         }
     }

@@ -1,15 +1,20 @@
 int nx, ny;    // mesh size
-int il, jl;    // lower bounds in x and y directions
+int *il, *jl;    // lower bounds in x and y directions
 int ie, je;    // upper bounds in x and y directions
 int ib, jb;    // bounds for ghost cells in x and y directions
 
 std::vector< float > x, y;
 std::vector< std::vector< std::vector< float > > > coords;
 std::vector< std::vector< float > > volume;
-float rlen, dx, dy;
+float *dx, *dy;
+float rlen;
 
 // function to allocate memory for mesh variables
 void AllocateMeshVariables(int nx, int ny, int ndim) {
+  cudaMallocManaged(&dx, sizeof(float));
+  cudaMallocManaged(&dy, sizeof(float));
+  cudaMallocManaged(&il, sizeof(int));
+  cudaMallocManaged(&jl, sizeof(int));
   x.resize(nx);
   y.resize(ny);
 
@@ -30,4 +35,9 @@ void DeallocateMeshVariables() {
   y.clear();
   coords.clear();
   volume.clear();
+
+  cudaFree(dx);
+  cudaFree(dy);
+  cudaFree(il);
+  cudaFree(jl);
 }

@@ -61,9 +61,14 @@ void Finalize() {
     DeallocateSolutionVariables();
     std::cout << ", solution variables \n";
     DeallocateTimeVariables();
+
+    cudaFree(gam);
+    cudaFree(prandtl);
+    cudaFree(cfl);
+
     std::cout << "Clock time spent in : \n";
     std::cout << "Time step calculation : "<<t_tstep;
     std::cout << "\nField update : "<<t_update;
     std::cout << "\nDerivative calculation : "<<t_derivs;
-    std::cout << "\nFlux calculation : "<<t_flux;
+    std::cout << "\nFlux calculation : "<<t_flux <<'\n';
 }

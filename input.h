@@ -11,7 +11,9 @@ void InputParameters() {
 
     // read flow parameters
     kvis = 1;
+    cudaMallocManaged(&gam, sizeof(float));
     gam = 1.667;
+    cudaMallocManaged(&prandtl, sizeof(float));
     prandtl = 1.0;
     rho0 = 1;
     rmu0 = 2.2360612501607223e-004;
@@ -30,6 +32,7 @@ void InputParameters() {
 
     // read run parameters
     ncyc = 1000;
+    cudaMallocManaged(&cfl, sizeof(float));
     cfl = 0.6;
 
     // read file names
