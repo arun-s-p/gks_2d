@@ -2,7 +2,7 @@
 
 void derivs_bgk() {
     const float eps = 1.0e-7;
-    float dsl, dsr, dx, dy;
+    float dsl, dsr, dx1, dy1;
     std::vector<float> fc(4), fcp(4);
     float wl[4], wr[4], wlp[4], wrp[4], w1p[4], w2p[4];
     // std::vector<float>  dwt0;
@@ -18,9 +18,9 @@ void derivs_bgk() {
     time(&tstart);
 
     // find flux contributions in i direction
-    for (j = 1; j < jl - 1; ++j) {
-        for (i = 1; i < il - 1; ++i) {
-            dy = coords[i][j + 1][1] - coords[i][j][1];
+    for (j = 1; j < *jl - 1; ++j) {
+        for (i = 1; i < *il - 1; ++i) {
+            dy1 = coords[i][j + 1][1] - coords[i][j][1];
             dsl = 0.5 * (coords[i + 1][j][0] - coords[i][j][0]);
             dsr = 0.5 * (coords[i + 2][j][0] - coords[i + 1][j][0]);
 
@@ -67,20 +67,20 @@ void derivs_bgk() {
             w2p[2] = w[i + 1][j][2];
             w2p[3] = w[i + 1][j][3];
 
-            bgkflux(wl, wr, w1p, w2p, dsl, dsr, dtmin, rmu0, fc, gam, prandtl);
+            bgkflux(wl, wr, w1p, w2p, dsl, dsr, *dtmin, rmu0, fc, *gam, *prandtl);
 
             for (n = 0; n < 4; ++n) {
                 // accumulate complete convective flux
-                dw[i][j][n] += fc[n]*dy;
-                dw[i + 1][j][n] -= fc[n]*dy;
+                dw[i][j][n] += fc[n]*dy1;
+                dw[i + 1][j][n] -= fc[n]*dy1;
             }
         }
     }
 
     // find flux contributions in j direction
-    for (j = 1; j < jl - 1; ++j) {
-        for (i = 1; i < il - 1; ++i) {
-            dx = coords[i + 1][j][0] - coords[i][j][0];
+    for (j = 1; j < *jl - 1; ++j) {
+        for (i = 1; i < *il - 1; ++i) {
+            dx1 = coords[i + 1][j][0] - coords[i][j][0];
             dsl = 0.5 * (coords[i][j + 1][1] - coords[i][j][1]);
             dsr = 0.5 * (coords[i][j + 2][1] - coords[i][j + 1][1]);
 
@@ -115,7 +115,7 @@ void derivs_bgk() {
                 wr[n] = omegar[0] * prw[0] + omegar[1] * prw[1];
             }
 
-            if (j == 1 || j == jl - 2) {
+            if (j == 1 || j == *jl - 2) {
                 for (n = 0; n < 4; ++n){
                     wl[n] = 0.5 * (w[i][j][n] + w[i][j + 1][n]);
                     wr[n] = wl[n];
@@ -143,12 +143,12 @@ void derivs_bgk() {
             w2p[2] = -w[i][j + 1][1];
             w2p[3] = w[i][j + 1][3];
 
-            bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, dtmin, rmu0, fcp, gam, prandtl);
+            bgkflux(wlp, wrp, w1p, w2p, dsl, dsr, *dtmin, rmu0, fcp, *gam, *prandtl);
 
-            fc[0] = fcp[0]*dx;
-            fc[1] = -fcp[2]*dx;
-            fc[2] = fcp[1]*dx;
-            fc[3] = fcp[3]*dx;
+            fc[0] = fcp[0]*dx1;
+            fc[1] = -fcp[2]*dx1;
+            fc[2] = fcp[1]*dx1;
+            fc[3] = fcp[3]*dx1;
 
             for (n = 0; n < 4; ++n) {
                 // accumulate complete convective flux

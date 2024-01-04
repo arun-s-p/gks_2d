@@ -65,7 +65,7 @@ int main() {
     for ( cyc = 1; cyc <= ncyc; ++cyc) {
         CalculateDT();
         UpdateField();
-        simtime += dtmin;
+        simtime += *dtmin;
 
         // if (CYC % 50 == 0)
             // std::cout << CYC << " " << DTMIN << " " << TIME << std::endl;

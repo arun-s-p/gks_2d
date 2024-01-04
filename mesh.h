@@ -6,13 +6,13 @@ void CartesianMesh2D() {
     int i, j;
 
     pi = 4.0 * atan(1.0);
-    dx = 20.0 * vthick0 / (float(nx) - 1.0);
+    *dx = 20.0 * vthick0 / (float(nx) - 1.0);
     for (i = 0; i < ib; ++i)
-        x[i] = (i-2)*dx;
+        x[i] = *dx * (i-2);
 
-    dy = 20.0 * vthick0 / (float(ny) - 1.0);
+    *dy = 20.0 * vthick0 / (float(ny) - 1.0);
     for (j = 0; j < jb; ++j)
-        y[j] = (j-2)*dy;
+        y[j] = *dy * (j-2);
 
     int ncells =0;
     for (j = 0; j < je; ++j) {

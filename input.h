@@ -2,8 +2,8 @@ void InputParameters() {
     // read grid limits
     nx = 128;
     ny = 151;
-    il = nx + 2;
-    jl = ny + 2;
+    *il = nx + 2;
+    *jl = ny + 2;
     ie = nx + 3;
     ib = nx + 4;
     je = ny + 3;
@@ -12,13 +12,13 @@ void InputParameters() {
     // read flow parameters
     kvis = 1;
     cudaMallocManaged(&gam, sizeof(float));
-    gam = 1.667;
+    *gam = 1.667;
     cudaMallocManaged(&prandtl, sizeof(float));
-    prandtl = 1.0;
+    *prandtl = 1.0;
     rho0 = 1;
     rmu0 = 2.2360612501607223e-004;
     p0 = 10.0;
-    c0 = std::sqrt(gam * p0 / rho0);
+    c0 = std::sqrt(*gam * p0 / rho0);
 
     rm = 0.2;
     u0 = 2.0 * rm * c0;
@@ -33,7 +33,7 @@ void InputParameters() {
     // read run parameters
     ncyc = 1000;
     cudaMallocManaged(&cfl, sizeof(float));
-    cfl = 0.6;
+    *cfl = 0.6;
 
     // read file names
     iread = 0;  // iread = 1 for restart

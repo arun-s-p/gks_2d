@@ -1,20 +1,20 @@
-void CalculateDT() {
+__global__ void CalculateDT() {
     // local variables
     float ds;
     float a, prg, pa, ra, cs, qs;
     int i, j;
 
-    time_t tstart, tend;
-    time(&tstart);
+    // time_t tstart, tend;
+    // time(&tstart);
 
     // spectral radius in i direction
-    for (j = 2; j < jl - 1; ++j) {
-        for (i = 2; i < il; ++i) {
+    for (j = 2; j < *jl - 1; ++j) {
+        for (i = 2; i < *il; ++i) {
             pa = w[i - 1][j][3] + w[i][j][3];
             ra = w[i - 1][j][0] + w[i][j][0];
-            ds = dy; //y[j + 1] - y[j];
+            ds = *dy; //y[j + 1] - y[j];
 
-            cs = std::sqrt(gam * pa / ra) * ds;
+            cs = std::sqrt(*gam * pa / ra) * ds;
             qs = 0.5 * (w[i - 1][j][1] + w[i][j][1]) * ds;
             a = std::abs(qs) + cs;
 
@@ -83,7 +83,6 @@ void CalculateDT() {
     }
     dtmin *= cfl;
 */
-    time(&tend);
-    t_tstep += (tend - tstart);
+    // time(&tend);
+    // t_tstep += (tend - tstart);
 }
-

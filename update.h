@@ -11,12 +11,12 @@ void UpdateField() {
 
     time_t tstart, tend;
     time(&tstart);
-    gm1 = gam - 1.0;
+    gm1 = *gam - 1.0;
 
     // save the current solution
     for (n = 0; n < 4; ++n) {
-        for (j = 0; j < jl; ++j) {
-            for (i = 0; i < il; ++i) {
+        for (j = 0; j < *jl; ++j) {
+            for (i = 0; i < *il; ++i) {
                 w0[i][j][n] = w[i][j][n];
             }
         }
@@ -26,9 +26,9 @@ void UpdateField() {
     // call the derivs_bgk function
     derivs_bgk();
 
-    for (j = 2; j < jl - 1; ++j) {
-        for (i = 2; i < il - 1; ++i) {
-            dt = dtmin / volume[i][j];
+    for (j = 2; j < *jl - 1; ++j) {
+        for (i = 2; i < *il - 1; ++i) {
+            dt = *dtmin / volume[i][j];
 
             // compute conservative variables from primitive variables
             wc[0] = w0[i][j][0];
